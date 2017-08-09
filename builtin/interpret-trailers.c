@@ -25,6 +25,7 @@ int cmd_interpret_trailers(int argc, const char **argv, const char *prefix)
 		OPT_BOOL(0, "in-place", &opts.in_place, N_("edit files in place")),
 		OPT_BOOL(0, "trim-empty", &opts.trim_empty, N_("trim empty trailers")),
 		OPT_BOOL(0, "only-trailers", &opts.only_trailers, N_("output only the trailers")),
+		OPT_BOOL(0, "only-existing", &opts.only_existing, N_("output only existing trailers")),
 		OPT_STRING_LIST(0, "trailer", &trailers, N_("trailer"),
 				N_("trailer(s) to add")),
 		OPT_END()
@@ -32,6 +33,12 @@ int cmd_interpret_trailers(int argc, const char **argv, const char *prefix)
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_interpret_trailers_usage, 0);
+
+	if (opts.only_existing && trailers.nr)
+		usage_msg_opt(
+			_("--trailer with --only-existing does not make sense"),
+			git_interpret_trailers_usage,
+			options);
 
 	if (argc) {
 		int i;

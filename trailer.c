@@ -990,9 +990,10 @@ void process_trailers(const char *file, struct process_trailer_options *opts,
 	trailer_end = process_input_file(opts->only_trailers ? NULL : outfile,
 					 sb.buf, &head);
 
-	process_command_line_args(&arg_head, trailers);
-
-	process_trailers_lists(&head, &arg_head);
+	if (!opts->only_existing) {
+		process_command_line_args(&arg_head, trailers);
+		process_trailers_lists(&head, &arg_head);
+	}
 
 	print_all(outfile, &head, opts);
 
