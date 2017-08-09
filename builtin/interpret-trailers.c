@@ -73,15 +73,29 @@ static int option_parse_trailer(const struct option *opt,
 	return 0;
 }
 
+static int parse_opt_parse(const struct option *opt, const char *arg,
+			   int unset)
+{
+	struct process_trailer_options *v = opt->value;
+	v->only_trailers = 1;
+	v->only_existing = 1;
+	v->normalize = 1;
+	return 0;
+}
+
 int cmd_interpret_trailers(int argc, const char **argv, const char *prefix)
 {
-	int in_place = 0;
-	int trim_empty = 0;
+	struct process_trailer_options opts = PROCESS_TRAILER_OPTIONS_INIT;
 	LIST_HEAD(trailers);
 
 	struct option options[] = {
-		OPT_BOOL(0, "in-place", &in_place, N_("edit files in place")),
-		OPT_BOOL(0, "trim-empty", &trim_empty, N_("trim empty trailers")),
+		OPT_BOOL(0, "in-place", &opts.in_place, N_("edit files in place")),
+		OPT_BOOL(0, "trim-empty", &opts.trim_empty, N_("trim empty trailers")),
+		OPT_BOOL(0, "only-trailers", &opts.only_trailers, N_("output only the trailers")),
+		OPT_BOOL(0, "only-existing", &opts.only_existing, N_("output only existing trailers")),
+		OPT_BOOL(0, "normalize", &opts.normalize, N_("normalize trailer formatting")),
+		{ OPTION_CALLBACK, 0, "parse", &opts, NULL, N_("set parsing options"),
+			PARSE_OPT_NOARG | PARSE_OPT_NONEG, parse_opt_parse },
 
 		OPT_CALLBACK(0, "where", NULL, N_("action"),
 			     N_("where to place the new trailer"), option_parse_where),
@@ -98,14 +112,20 @@ int cmd_interpret_trailers(int argc, const char **argv, const char *prefix)
 	argc = parse_options(argc, argv, prefix, options,
 			     git_interpret_trailers_usage, 0);
 
+	if (opts.only_existing && !list_empty(&trailers))
+		usage_msg_opt(
+			_("--trailer with --only-existing does not make sense"),
+			git_interpret_trailers_usage,
+			options);
+
 	if (argc) {
 		int i;
 		for (i = 0; i < argc; i++)
-			process_trailers(argv[i], in_place, trim_empty, &trailers);
+			process_trailers(argv[i], &opts, &trailers);
 	} else {
-		if (in_place)
+		if (opts.in_place)
 			die(_("no input file given for in-place editing"));
-		process_trailers(NULL, in_place, trim_empty, &trailers);
+		process_trailers(NULL, &opts, &trailers);
 	}
 
 	new_trailers_clear(&trailers);

@@ -103,6 +103,23 @@ OPTIONS
 	and applies to all '--trailer' options until the next occurrence of
 	'--if-missing' or '--no-if-missing'.
 
+--only-trailers::
+	Output only the trailers, not any other parts of the input.
+
+--only-existing::
+	Output only trailers that exist in the input; do not add any
+	from the command-line or by following configured `trailer.*`
+	rules.
+
+--normalize::
+	Normalize trailer output so that trailers appear exactly one per
+	line, with any existing whitespace continuation folded into a
+	single line.
+
+--parse::
+	A convenience alias for `--only-trailers --only-existing
+	--normalize`.
+
 CONFIGURATION VARIABLES
 -----------------------
 
