@@ -93,6 +93,10 @@ OPTIONS
 	line, with any existing whitespace continuation folded into a
 	single line.
 
+--parse::
+	A convenience alias for `--only-trailers --only-existing
+	--normalize`.
+
 CONFIGURATION VARIABLES
 -----------------------
 
